@@ -1,0 +1,21 @@
+{
+  "name": "ev-charger-map",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Personal EV trip planner with road-distance charging stops",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "migrate": "node scripts/migrate.js",
+    "ingest": "node src/ingest/run.js",
+    "ingest:offline": "node src/ingest/run.js --offline",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "pg": "^8.23.1"
+  }
+}

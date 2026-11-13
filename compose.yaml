@@ -1,0 +1,39 @@
+services:
+  db:
+    image: postgis/postgis:17-3.5-alpine
+    environment:
+      # Local-only credentials; the container is bound to localhost below.
+      POSTGRES_USER: ev
+      POSTGRES_PASSWORD: ev
+      POSTGRES_DB: evcharger
+    ports:
+      - "127.0.0.1:5433:5432"   # psql from the host on 5433
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ev -d evcharger"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  app:
+    build: .
+    env_file: .env              # API keys
+    environment:
+      DATABASE_URL: postgres://ev:ev@db:5432/evcharger
+      PORT: 3000
+      NODE_ENV: development
+    ports:
+      - "127.0.0.1:3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      # Dev only: mount the project so edits apply without a rebuild...
+      - .:/app
+      # ...but keep the image's node_modules rather than the (empty) host folder.
+      - /app/node_modules
+    command: ["node", "--watch", "src/server.js"]
+
+volumes:
+  pgdata:
