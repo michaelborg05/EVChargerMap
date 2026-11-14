@@ -33,6 +33,9 @@ services:
       - .:/app
       # ...but keep the image's node_modules rather than the (empty) host folder.
       - /app/node_modules
+    # --watch restarts on file changes with native Docker. Docker Desktop's file
+    # sharing doesn't pass change events through, so there: after editing src/,
+    # run `docker compose restart app`. (public/ files just need a page refresh.)
     command: ["node", "--watch", "src/server.js"]
 
 volumes:

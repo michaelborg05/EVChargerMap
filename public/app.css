@@ -1,0 +1,103 @@
+/* Marker colours: blue = usable DC, purple = AC, grey = can't use.
+   Green, amber and red are reserved for route charge levels and warnings. */
+:root {
+  --dc: #1d4ed8;
+  --ac: #7c3aed;
+  --off: #9ca3af;
+  --warn-bg: #fef3c7;
+  --warn-fg: #92400e;
+  --ink: #111827;
+  --muted: #6b7280;
+  --panel: #ffffff;
+  --line: #e5e7eb;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: var(--ink);
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body { display: flex; flex-direction: column; background: #f3f4f6; }
+
+.bar {
+  display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap;
+  padding: 8px 16px; background: var(--panel); border-bottom: 1px solid var(--line);
+}
+.bar h1 { font-size: 18px; margin: 0; }
+.vehicle { color: var(--muted); font-size: 14px; }
+
+.layout { flex: 1; display: flex; min-height: 0; }
+.map { flex: 1; min-height: 300px; }
+
+.legend {
+  width: 270px; padding: 12px 16px; overflow-y: auto;
+  background: var(--panel); border-right: 1px solid var(--line); font-size: 14px;
+}
+.legend h2 { font-size: 15px; margin: 0 0 8px; }
+.legend .hint { color: var(--muted); font-weight: normal; }
+.legend ul { list-style: none; padding: 0; margin: 0; }
+.legend li label { display: grid; grid-template-columns: auto 40px 1fr; gap: 8px; align-items: center; padding: 6px 0; cursor: pointer; }
+.legend small { color: var(--muted); }
+.tesla-note { font-size: 13px; color: var(--muted); }
+.status { font-size: 13px; color: var(--muted); min-height: 1.2em; }
+.status.warn { color: var(--warn-fg); background: var(--warn-bg); padding: 4px 6px; border-radius: 4px; }
+
+/* Markers (also used in the legend) */
+.mk {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 30px; height: 22px; padding: 0 5px; border-radius: 11px;
+  font: 600 12px/1 system-ui, sans-serif; border: 2px solid #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,.35); cursor: pointer; white-space: nowrap;
+}
+.mk-dc { background: var(--dc); color: #fff; }
+.mk-dc_unconfirmed { background: #fff; color: var(--dc); border: 2px dashed var(--dc); }
+.mk-ac { background: var(--ac); color: #fff; min-width: 24px; height: 18px; font-size: 11px; }
+.mk-incompatible { background: var(--off); min-width: 12px; width: 12px; height: 12px; padding: 0; opacity: .8; }
+.mk-inline { min-width: 22px; height: 18px; box-shadow: none; }
+.mk-tesla::before { content: "T"; font-size: 9px; margin-right: 3px; opacity: .85; }
+/* "+1": more chargers at this spot (click to see them) */
+.mk-more { font-size: 10px; margin-left: 3px; opacity: .85; }
+.mk-incompatible .mk-more { display: none; }
+
+/* Zoomed out (map has .compact): plain dots, no labels, no grey markers.
+   Labels come back when zoomed in, so nothing overlaps into a blur. */
+.compact .mk { min-width: 11px; width: 11px; height: 11px; padding: 0; font-size: 0; border-width: 1.5px; }
+.compact .mk-dc_unconfirmed { border: 2.5px solid var(--dc); background: #fff; }   /* hollow ring */
+.compact .mk-tesla::before { content: none; }
+.compact .mk-incompatible { display: none; }
+
+/* Info window */
+.info { font-size: 13px; max-width: 300px; }
+.info h3 { font-size: 15px; margin: 0 0 2px; }
+.info .sub { color: var(--muted); margin: 0 0 6px; }
+.info .cat { display: inline-block; font-weight: 600; margin-bottom: 6px; }
+.info .cat-dc { color: var(--dc); }
+.info .cat-ac { color: var(--ac); }
+.info .cat-incompatible { color: var(--muted); }
+.info table { border-collapse: collapse; margin: 4px 0 6px; }
+.info td { padding: 1px 8px 1px 0; }
+.info dl { display: grid; grid-template-columns: auto 1fr; gap: 2px 8px; margin: 4px 0; }
+.info dt { color: var(--muted); }
+.info dd { margin: 0; }
+.info .warnings { list-style: none; padding: 6px 8px; margin: 6px 0; background: var(--warn-bg); color: var(--warn-fg); border-radius: 4px; }
+.info .warnings li + li { margin-top: 3px; }
+.info .sources { color: var(--muted); font-size: 12px; }
+.info .group { border-top: 1px solid var(--line); margin-top: 6px; padding-top: 6px; }
+.info .group-title { margin: 0 0 4px; font-weight: 600; }
+.info .group-item {
+  display: block; width: 100%; text-align: left; margin: 2px 0; padding: 4px 6px;
+  font: inherit; background: #f9fafb; border: 1px solid var(--line); border-radius: 4px; cursor: pointer;
+}
+.info .group-item:hover { background: #eef2ff; }
+
+.attribution {
+  font-size: 11px; color: var(--muted); padding: 4px 16px;
+  background: var(--panel); border-top: 1px solid var(--line);
+}
+.attribution a { color: inherit; }
+
+/* Phone: legend collapses to a strip above the map */
+@media (max-width: 700px) {
+  .layout { flex-direction: column; }
+  .legend { width: auto; max-height: 34vh; border-right: 0; border-bottom: 1px solid var(--line); }
+  .legend li label { padding: 3px 0; }
+}

@@ -1,0 +1,16 @@
+{
+  "id": "atto3-2025-extended",
+  "name": "BYD Atto 3 Premium (Extended Range), 2025",
+  "isTesla": false,
+  "batteryKwh": 60.48,
+  "batteryNote": "Gross capacity; usable is slightly lower",
+  "dcConnectors": ["CCS2"],
+  "acConnectors": ["Type2"],
+  "maxDcKw": 80,
+  "maxAcKw": 7,
+  "officialRangeKm": { "nedc": 480, "wltp": 420 },
+  "consumptionKwhPer100km": {
+    "100": { "value": 16.6, "basis": "estimate" },
+    "110": { "value": 18.3, "basis": "measured", "note": "Yass to Albury, Nov 2026, cruise control" }
+  }
+}

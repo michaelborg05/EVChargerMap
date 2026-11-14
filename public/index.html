@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EV Charger Map</title>
+  <link rel="stylesheet" href="/app.css">
+</head>
+<body>
+  <header class="bar">
+    <h1>EV Charger Map</h1>
+    <span id="vehicle" class="vehicle"></span>
+  </header>
+
+  <main class="layout">
+    <aside class="legend" id="legend" aria-label="Legend and filters">
+      <h2>Chargers <span class="hint">for your car</span></h2>
+      <ul>
+        <li><label>
+          <input type="checkbox" data-category="dc" checked>
+          <span class="mk mk-dc">75</span>
+          <span><b>Fast DC, fits your car</b><br><small>Number = max kW. <span class="mk mk-dc mk-inline">?</span> = kW unknown</small></span>
+        </label></li>
+        <li><label>
+          <input type="checkbox" data-category="dc_unconfirmed" checked>
+          <span class="mk mk-dc_unconfirmed">50</span>
+          <span><b>DC, plug type not stated</b><br><small>Might not fit: check before relying on it</small></span>
+        </label></li>
+        <li><label>
+          <input type="checkbox" data-category="ac">
+          <span class="mk mk-ac">22</span>
+          <span><b>AC only (slow)</b><br><small>Destination charging</small></span>
+        </label></li>
+        <li><label>
+          <input type="checkbox" data-category="incompatible" checked>
+          <span class="mk mk-incompatible"></span>
+          <span><b>Can't use</b><br><small>Wrong plug, Tesla-only, or no plug data</small></span>
+        </label></li>
+      </ul>
+      <p class="tesla-note"><span class="mk mk-dc mk-inline mk-tesla">250</span> = Tesla Supercharger open to other EVs</p>
+      <p id="status" class="status" role="status"></p>
+    </aside>
+    <div id="map" class="map" aria-label="Map"></div>
+  </main>
+
+  <footer class="attribution" id="attribution"></footer>
+
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

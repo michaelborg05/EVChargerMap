@@ -13,8 +13,15 @@ function required(name) {
 export const config = {
   databaseUrl: required('DATABASE_URL'),
   port: Number(process.env.PORT ?? 3000),
+  // Advanced markers need a map ID. Google's DEMO_MAP_ID works for
+  // development; create a real one (free) in Google Cloud before hosting.
+  googleMapsMapId: process.env.GOOGLE_MAPS_MAP_ID ?? 'DEMO_MAP_ID',
   keys: {
-    google: process.env.GOOGLE_API_KEY,
+    // Server-side only: never send this one to the browser.
+    googlePlaces: process.env.GOOGLE_PLACES_API_KEY,
+    // Browser key for the map page. Public by design; protected by API,
+    // referrer and quota restrictions in Google Cloud.
+    googleMaps: process.env.GOOGLE_MAPS_API_KEY,
     openRouteService: process.env.OPENROUTESERVICE_API_KEY,
     openChargeMap: process.env.OPENCHARGE_API_KEY,
   },

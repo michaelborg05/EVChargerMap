@@ -1,12 +1,15 @@
 // Ingest, step 1: run the vendored halans pipeline. It fetches NSW, VIC, ACT,
 // QLD, TAS, OSM and Open Charge Map, normalises and merges them, and writes
-// data/halans/cache/dataset.json.
-// Step 2 (load into Postgres) is added once the schema is agreed (task 2a.2).
+// data/halans/cache/dataset.json. Step 2: load it into Postgres (load.js).
+// Step 3: Tesla open-to-all data from supercharge.info (superchargers.js).
 //
 //   node src/ingest/run.js            fetch fresh from every source
 //   node src/ingest/run.js --offline  reuse files already in data/halans/raw
 import path from 'node:path';
 import { createRequire } from 'node:module';
+import { pool } from '../db.js';
+import { loadDataset } from './load.js';
+import { loadSuperchargers } from './superchargers.js';
 
 // Point halans at our gitignored data folder. This must be set before the
 // require() below, because halans reads it when its modules load.
@@ -41,6 +44,23 @@ console.log(`wrote ${path.relative(process.cwd(), pipeline.DATASET_PATH)}`);
 
 const failed = report.sources.filter((s) => s.error);
 if (failed.length) {
+  // Still load: halans keeps going without a failed source, and a missing
+  // source is better than no data. The warning (and exit code) says which.
   console.error(`WARNING: ${failed.length} source(s) failed: ${failed.map((s) => s.sourceId).join(', ')}`);
   process.exitCode = 1;
+}
+
+// Step 2: replace open-data rows in Postgres.
+// Step 3: Tesla open-to-all data. A failure here keeps the previous
+// supercharger table, so the chargers loaded in step 2 still stand.
+try {
+  await loadDataset(pipeline.DATASET_PATH);
+  try {
+    await loadSuperchargers({ offline });
+  } catch (err) {
+    console.error(`WARNING: supercharge.info step failed, kept previous data: ${err.message}`);
+    process.exitCode = 1;
+  }
+} finally {
+  await pool.end();
 }

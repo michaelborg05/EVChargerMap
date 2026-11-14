@@ -10,13 +10,22 @@ need the reasoning behind a decision; don't re-argue logged decisions.
 
 ## Current stage
 
-Stage 2a: data foundation. Done when:
-- Docker Compose runs the Node.js app and Postgres + PostGIS
-- The halans ingest loads chargers into the database
-- One SQL query returns all CCS2 DC chargers within 5 km of a point (e.g. Goulburn)
+Stage 2b: map. 2a (data) is done except 2a.4 (duplicate review, via Google
+Places lookups). 2b.1 map page is built; next is 2b.2, the owner judging the
+markers against the PlugShare complaints.
 
-Later stages: 2b map, 2c route and corridor, 2d planner, 3 validate against
+Later stages: 2c route and corridor, 2d planner, 3 validate against
 the November 2026 Melbourne trip actuals (see docs/PLAN.md, Stage 3).
+
+## Running it
+
+- `docker compose up -d` (add `--build -V` after changing dependencies, so the
+  container gets a fresh node_modules)
+- `docker compose exec app node scripts/migrate.js`
+- `docker compose exec app node src/ingest/run.js [--offline]`
+- `docker compose exec app node --test`
+- Map: http://localhost:3000. On Docker Desktop `--watch` doesn't see file
+  changes: `docker compose restart app` after editing `src/`.
 
 ## Stack (decided)
 
@@ -30,8 +39,13 @@ the November 2026 Melbourne trip actuals (see docs/PLAN.md, Stage 3).
 
 ## Rules for the code
 
-- All config from environment variables (`DATABASE_URL`, `GOOGLE_API_KEY`,
-  `OPENROUTESERVICE_API_KEY`, `OPENCHARGE_API_KEY`, `PORT`); see `.env.example`. Use a `.env` file locally; `.env` is in `.gitignore`.
+- All config from environment variables (`DATABASE_URL`, `GOOGLE_PLACES_API_KEY`,
+  `GOOGLE_MAPS_API_KEY`, `OPENROUTESERVICE_API_KEY`, `OPENCHARGE_API_KEY`, `PORT`);
+  see `.env.example`. The Places key is server-only and must never reach the browser;
+  the Maps key is the only key the frontend may see.
+- Vehicles: backend code, schema and APIs must take the vehicle (battery, connectors,
+  max DC kW, per-speed consumption, Tesla or not) as data, never hardcode the Atto 3.
+  The UI may assume the Atto 3 for v1. Use a `.env` file locally; `.env` is in `.gitignore`.
   Never commit keys or write them into code, logs or tests.
 - The same Docker image must run locally and on Render with config changes only.
 - Ask before adding a dependency; prefer few, well-known packages.
@@ -45,7 +59,11 @@ the November 2026 Melbourne trip actuals (see docs/PLAN.md, Stage 3).
 - Any leg that breaks the buffer must be flagged, never silently allowed.
 - Unknown charger kW: assume 50 kW for charge-time estimates and mark it as an estimate.
 - Exclude unbuilt ("Upcoming") chargers. A missing fee is never shown as free.
-- Tesla Superchargers excluded by default; include only sites confirmed open to non-Teslas.
+- Vehicle type setting (Tesla / non-Tesla, default non-Tesla). Tesla vehicle: all Tesla
+  sites. Non-Tesla: Tesla sites only if confirmed open to non-Teslas (supercharge.info
+  `otherEVs`, loaded each ingest; no data licence, personal use only). Query chargers
+  through `sites_for_vehicle(is_tesla)`; `available_sites` is the non-Tesla default.
+- DC chargers with no stated plug type are shown with a "check for CCS2" warning.
 - A "my chargers" table holds verified sites missing from open data
   (e.g. Oliver's Gundagai); treat them like any other charger.
 
